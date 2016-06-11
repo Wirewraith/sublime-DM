@@ -6,6 +6,8 @@ import time
 import os
 import tempfile
 import codecs
+from os import path
+from os.path import isfile
 execplugin = __import__("Default.exec")
 execcmd = execplugin.exec
 
@@ -41,16 +43,17 @@ class ExecInWindowCommand(execcmd.sublime_plugin.WindowCommand, execcmd.ProcessL
         self.post_command=env.get('post_command',None)
 
         # Create temporary file if doesn't exists
-        #
         if self.window.active_view().file_name():
             self.file = self.window.active_view().file_name()
         else:
             self.file          = self.create_temp_file()
             cmd[cmd.index('')] = self.file
 
-        # Default the to the current files directory if no working directory was given
-        if (working_dir == "" and self.window.active_view() and self.file):
-            working_dir = os.path.dirname(self.file)
+        # Attempt to find the correct working dir based on the default_dme.
+        for c,d,f in self.walk_up(os.path.dirname(self.file)):
+            for file in f:
+                if file.lower() == self.get_setting("default_dme"):
+                    working_dir = c
 
         self.output_view = self.window.open_file(working_dir + "/Build System")
         self.output_view.set_scratch(True)
@@ -66,7 +69,6 @@ class ExecInWindowCommand(execcmd.sublime_plugin.WindowCommand, execcmd.ProcessL
         self.clear_view()
 
         if not self.quiet:
-            print( "Running " + " ".join(cmd) )
             execcmd.sublime.status_message("Building")
 
         merged_env = env.copy()
@@ -86,7 +88,6 @@ class ExecInWindowCommand(execcmd.sublime_plugin.WindowCommand, execcmd.ProcessL
 
         try:
             # Forward kwargs to AsyncProcess
-            print(str(cmd))
             self.proc = execcmd.AsyncProcess(cmd, False, merged_env, self, **kwargs)
         except err_type as e:
             self.append_data(None, str(e) + "\n")
@@ -185,3 +186,37 @@ class ExecInWindowCommand(execcmd.sublime_plugin.WindowCommand, execcmd.ProcessL
         else:
             settings = sublime.load_settings('DM.sublime-settings')
             return settings.get('dm_' + config)
+
+    def walk_up(self, bottom):
+        """
+        mimic os.walk, but walk 'up'
+        instead of down the directory tree
+        """
+
+        bottom = path.realpath(bottom)
+
+        #get files in current dir
+        try:
+            names = os.listdir(bottom)
+        except Exception as e:
+            print(e)
+            return
+
+
+        dirs, nondirs = [], []
+        for name in names:
+            if path.isdir(path.join(bottom, name)):
+                dirs.append(name)
+            else:
+                nondirs.append(name)
+
+        yield bottom, dirs, nondirs
+
+        new_path = path.realpath(path.join(bottom, '..'))
+
+        # see if we are at the top
+        if new_path == bottom:
+            return
+
+        for x in self.walk_up(new_path):
+            yield x
