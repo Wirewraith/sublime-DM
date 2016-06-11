@@ -1,0 +1,21 @@
+{
+	"file_regex": "^(..[^:]*):([0-9]+):()((warning|error):.+)$",
+	"selector": "source.dm",
+	"target": "exec_in_window",
+	"dm_maker": true,
+
+	"variants": [
+		{
+			"name": "Run in DreamSeeker",
+			"dm_seeker": true
+		},
+		{
+			"name": "Run in DreamDaemon",
+			"dm_daemon": true
+		},
+		{
+			"name": "Kill current process",
+			"kill": true
+		}
+	]
+}
