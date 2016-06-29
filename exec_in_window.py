@@ -55,7 +55,7 @@ class ExecInWindowCommand(execcmd.sublime_plugin.WindowCommand, execcmd.ProcessL
                 if file.lower() == self.get_setting("default_dme"):
                     working_dir = c
 
-        self.output_view = self.window.open_file(working_dir + "/Build System")
+        self.output_view = self.window.open_file(working_dir + "/Build System.dm")
         self.output_view.set_scratch(True)
         self.output_view.set_read_only(False)
 
