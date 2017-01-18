@@ -64,7 +64,7 @@
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>\b(sleep|spawn|break|continue|do|else|for|goto|if|return|switch|while)\b</string>
+			<string>\b(sleep|spawn|break|continue|do|else|for|goto|if|return|switch|while|try|catch|throw)\b</string>
 			<key>name</key>
 			<string>keyword.control.dm</string>
 		</dict>
