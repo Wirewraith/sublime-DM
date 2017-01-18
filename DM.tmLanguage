@@ -52,7 +52,7 @@
 				</dict>
 			</dict>
 			<key>match</key>
-			<string>(?x)(var)[\/ ](?:(static|global|tmp|const)\/)?(?:(datum|atom(?:\/movable)?|obj|mob|turf|area|savefile|list|client|sound|image|database|matrix|regex|exception|icon)\/)?(?:([a-zA-Z0-9_\-$]*)\/)*([A-Za-z0-9]*)\b</string>
+			<string>(?x)(var)[\/ ](?:(static|global|tmp|const)\/)?(?:(datum|atom(?:\/movable)?|obj|mob|turf|area|savefile|list|client|sound|image|database|matrix|regex|exception|icon)\/)?(?:([a-zA-Z0-9_\-$]*)\/)*([A-Za-z0-9_$]*)\b</string>
 			<key>name</key>
 			<string>meta.initialization.dm</string>
 		</dict>
