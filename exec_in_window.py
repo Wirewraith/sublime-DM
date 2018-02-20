@@ -223,8 +223,8 @@ class ExecInWindowCommand(execcmd.sublime_plugin.WindowCommand, execcmd.ProcessL
         for x in self.walk_up(new_path):
             yield x
 
-    def getBuildFileDetails(startDir, extension):
-        for dirName, subdirList, fileList in walk_up(startDir):
+    def getBuildFileDetails(self, startDir, extension):
+        for dirName, subdirList, fileList in self.walk_up(startDir):
             for file in fileList:
                 if file.lower().endswith(extension):
                     return file, dirName
