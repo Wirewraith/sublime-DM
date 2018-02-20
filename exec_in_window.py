@@ -49,7 +49,7 @@ class ExecInWindowCommand(execcmd.sublime_plugin.WindowCommand, execcmd.ProcessL
             self.file          = self.create_temp_file()
             cmd[cmd.index('')] = self.file
 
-        buildFileDetails = getBuildFileDetails(os.path.dirname(os.path.realpath(__file__)), ".dmb" if dm_daemon or dm_seeker else ".dme")
+        buildFileDetails = self.getBuildFileDetails(os.path.dirname(os.path.realpath(__file__)), ".dmb" if dm_daemon or dm_seeker else ".dme")
         working_dir = buildFileDetails[1]
 
         if dm_daemon or dm_seeker:
