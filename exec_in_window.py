@@ -25,13 +25,13 @@ class ExecInWindowCommand(execcmd.sublime_plugin.WindowCommand, execcmd.ProcessL
     def run(self, cmd = [], file_regex = "", line_regex = "", working_dir = "", encoding = "utf-8", env = {}, quiet = False, kill = False, dm_maker = False, dm_daemon = False, dm_seeker = False, **kwargs):
 
         if dm_maker:
-            cmd = [self.get_setting("installation_path") + self.get_setting("compiler_executable")] + [self.get_setting("default_dme")]
+            cmd = [self.get_setting("installation_path") + self.get_setting("compiler_executable")]
 
         if dm_daemon:
-            cmd = [self.get_setting("installation_path") + self.get_setting("daemon_executable")] + [self.get_setting("default_dmb")] + ["-trusted"]
+            cmd = [self.get_setting("installation_path") + self.get_setting("daemon_executable")] + ["dmbstub"] + ["-trusted"]
 
         if dm_seeker:
-            cmd = [self.get_setting("installation_path") + self.get_setting("seeker_executable")] + [self.get_setting("default_dmb")] + ["-trusted"]
+            cmd = [self.get_setting("installation_path") + self.get_setting("seeker_executable")] + ["dmbstub"] + ["-trusted"]
 
         if kill:
             if self.proc:
@@ -48,12 +48,31 @@ class ExecInWindowCommand(execcmd.sublime_plugin.WindowCommand, execcmd.ProcessL
         else:
             self.file          = self.create_temp_file()
             cmd[cmd.index('')] = self.file
+            
+        dme_file = None
+        dmb_file = None
 
-        # Attempt to find the correct working dir based on the default_dme.
+        # Attempt to find the correct working dir based on whether it contains a .dme/.dmb
         for c,d,f in self.walk_up(os.path.dirname(self.file)):
             for file in f:
-                if file.lower() == self.get_setting("default_dme"):
+                if dm_maker and file.lower().endswith(".dme"):
                     working_dir = c
+                    dme_file = file
+                    break
+                        
+                if (dm_daemon or dm_seeker) and file.lower().endswith(".dmb"):
+                    working_dir = c
+                    dmb_file = file
+                    break
+
+        if dm_maker:
+            cmd += [dme_file]
+
+        if dm_daemon:
+            cmd[1] = dmb_file
+
+        if dm_seeker:
+            cmd[1] = dmb_file
 
         self.output_view = self.window.open_file(working_dir + "/Build System.dm")
         self.output_view.set_scratch(True)
