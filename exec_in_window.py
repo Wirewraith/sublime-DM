@@ -48,31 +48,14 @@ class ExecInWindowCommand(execcmd.sublime_plugin.WindowCommand, execcmd.ProcessL
         else:
             self.file          = self.create_temp_file()
             cmd[cmd.index('')] = self.file
-            
-        dme_file = None
-        dmb_file = None
 
-        # Attempt to find the correct working dir based on whether it contains a .dme/.dmb
-        for c,d,f in self.walk_up(os.path.dirname(self.file)):
-            for file in f:
-                if dm_maker and file.lower().endswith(".dme"):
-                    working_dir = c
-                    dme_file = file
-                    break
-                        
-                if (dm_daemon or dm_seeker) and file.lower().endswith(".dmb"):
-                    working_dir = c
-                    dmb_file = file
-                    break
+        buildFileDetails = getBuildFileDetails(os.path.dirname(os.path.realpath(__file__)), ".dmb" if dm_daemon or dm_seeker else ".dme")
+        working_dir = buildFileDetails[1]
 
-        if dm_maker:
-            cmd += [dme_file]
-
-        if dm_daemon:
-            cmd[1] = dmb_file
-
-        if dm_seeker:
-            cmd[1] = dmb_file
+        if dm_daemon or dm_seeker:
+            cmd[1] = buildFileDetails[0]
+        else:
+            cmd += [buildFileDetails[0]]
 
         self.output_view = self.window.open_file(working_dir + "/Build System.dm")
         self.output_view.set_scratch(True)
@@ -239,3 +222,10 @@ class ExecInWindowCommand(execcmd.sublime_plugin.WindowCommand, execcmd.ProcessL
 
         for x in self.walk_up(new_path):
             yield x
+
+    def getBuildFileDetails(startDir, extension):
+        for dirName, subdirList, fileList in walk_up(startDir):
+            for file in fileList:
+                if file.lower().endswith(extension):
+                    return file, dirName
+        return None, ""
