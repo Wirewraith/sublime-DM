@@ -11,6 +11,9 @@ from os.path import isfile
 execplugin = __import__("Default.exec")
 execcmd = execplugin.exec
 
+class BuildFileNotFound(Exception):
+    pass
+
 class ExecInWindowAppendCommand(sublime_plugin.TextCommand):
     def run(self, edit, **kwargs):
         data = kwargs.get( 'data', None )
@@ -49,7 +52,12 @@ class ExecInWindowCommand(execcmd.sublime_plugin.WindowCommand, execcmd.ProcessL
             self.file          = self.create_temp_file()
             cmd[cmd.index('')] = self.file
 
-        buildFileDetails = self.getBuildFileDetails(os.path.dirname(os.path.realpath(__file__)), ".dmb" if dm_daemon or dm_seeker else ".dme")
+        try:
+            buildFileDetails = self.getBuildFileDetails(os.path.dirname(self.file), ".dmb" if (dm_daemon or dm_seeker) else ".dme")
+        except Exception as e:
+            self.append_data(None, str(e) + "\n")
+            return
+        
         working_dir = buildFileDetails[1]
 
         if dm_daemon or dm_seeker:
@@ -228,4 +236,5 @@ class ExecInWindowCommand(execcmd.sublime_plugin.WindowCommand, execcmd.ProcessL
             for file in fileList:
                 if file.lower().endswith(extension):
                     return file, dirName
-        return None, ""
+        
+        raise BuildFileNotFound("Unable to find build file with extension: " + extension)
